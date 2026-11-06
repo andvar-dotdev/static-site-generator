@@ -1,3 +1,4 @@
+from fileinput import filename
 import os, shutil
 from htmlnode import ParentNode
 from md_to_html import markdown_to_html_node
@@ -5,7 +6,7 @@ from md_to_html import markdown_to_html_node
 def main() -> None:
     # Note: limit of code is the way the slicing is used and relative paths. If main.py is not ran from root of project, or is renamed, or is ran in Windows, the below will not work.
     initialise_public("./static", "./public")
-    generate_page("./content/index.md", "./template.html", "./public/index.html")
+    generate_page_recursive("./content", "./template.html", "./public")
 
 def initialise_public(source: str, destination: str) -> None:
     if not os.path.exists(destination):
@@ -15,7 +16,6 @@ def initialise_public(source: str, destination: str) -> None:
         items: list[str] = os.listdir(source)
         for item in items:
             item_path: str = os.path.join(source, item)
-            #print(f"The items found are {items}. Current item is {item}, and the path checked is {item_path}")
             if os.path.isfile(item_path):
                 shutil.copy(item_path, destination)
             else:
@@ -23,11 +23,9 @@ def initialise_public(source: str, destination: str) -> None:
                 os.mkdir(new_destination)
                 initialise_public(item_path, new_destination)
 
-
 def remove_contents(path: str) -> None:
     abs_path = os.path.join(__file__[:-11], path)
     abs_path = os.path.normpath(abs_path)
-    print(abs_path)
     shutil.rmtree(abs_path)
     os.mkdir(abs_path)
 
@@ -40,18 +38,26 @@ def extract_title(markdown: str) -> str:
             return line[1:].strip()
     raise Exception("Error: No h1 header found, no title provided to the document.")
 
-def generate_page(from_path: str, template_path: str, dest_path: str) -> None:
+def generate_page_recursive(from_path: str, template_path: str, dest_path: str) -> None:
     print(f"Generating page from {from_path} to {dest_path} using {template_path}")
-    print(f"Current directory is {__file__}, and from path will be {os.path.normpath(os.path.join(__file__, from_path))}")
-    with open(from_path) as f:
-        md: str = f.read()
-    with open(template_path) as f:
-        template: str = f.read()
-    html_node: ParentNode = markdown_to_html_node(md)
-    html_string: str = html_node.to_html()
-    title: str = extract_title(md)
-    html_page: str = template.replace("{{ Title }}", title).replace("{{ Content }}", html_string)
-    with open(dest_path, "x") as f:
-        f.write(html_page)
+    items: list[str] = os.listdir(from_path)
+    for item in items:
+        item_path: str = os.path.join(from_path, item)
+#        print(f"current item is {item} and the path is {item_path}. Is this a file? {os.path.isfile(item_path)}")
+        if os.path.isfile(item_path):
+            with open(item_path) as f:
+                md: str = f.read()
+            with open(template_path) as f:
+                template: str = f.read()
+            html_node: ParentNode = markdown_to_html_node(md)
+            html_string: str = html_node.to_html()
+            title: str = extract_title(md)
+            html_page: str = template.replace("{{ Title }}", title).replace("{{ Content }}", html_string)
+            with open(os.path.join(dest_path, "index.html"), "x") as f:
+                f.write(html_page)
+        else:
+            new_destination: str = os.path.join(dest_path, item)
+            os.mkdir(new_destination)
+            generate_page_recursive(item_path, template_path, new_destination)
 
 main()
