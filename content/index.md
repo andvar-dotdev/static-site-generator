@@ -24,14 +24,14 @@ Here's the deal, **I like Tolkien**.
 ## My favorite characters (in order)
 
 1. Gandalf
-2. Bilbo
-3. Sam
-4. Glorfindel
-5. Galadriel
-6. Elrond
-7. Thorin
-8. Sauron
-9. Aragorn
+2. Luthien Tinuviel - Bravest of the Eldar!
+2. Gimli + Legolas duo
+3. Aragorn
+4. Sauron + hid dady Morgoth ;)
+5. Saruman
+6. Faramir
+7. Gollum
+8. All other characters are considered at the bottom of the list!
 
 Here's what `elflang` looks like (the perfect coding language):
 
